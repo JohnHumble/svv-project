@@ -16,19 +16,21 @@ function readFile(file){
 
         let lines = res.split("\n")
 
-        for (let i = 0; i < lines.length; i +=3) {
-            // TODO make this extract satellite position and orientation
-            // first line is satellite name
+        // check to see what kind of data to use
+        let mult_sat = lines[0].length == 69;
+        let inc = 2 + mult_sat;
 
-            
+        for (let i = 0; i < lines.length; i += inc) {
+            let sat = parseData(lines[i + mult_sat], lines[i + mult_sat])
+
             // if satellite is new, add it
-            if (sats[lines[i]] == undefined) {
+            if (sats[sat.number] == undefined) {
                 // create a new set of satellite locations
-                sats[lines[i]] = []
+                sats[sat.number] = []
             }
-            sats[lines[i]].push(parseData(lines[i+1], lines[i+2]))
-
-            // second line is
+            
+            // add data object to the list
+            sats[sat.number].push(sat);
         }
     }
     fr.readAsText(file);
@@ -52,15 +54,15 @@ function parseData(line1, line2) {
             },
         'd_mean':{
                 '1':line1.substring(33, 43),
-                '2':"."+line1.substring(44, 52),
+                '2':"."+line1.substring(44, 52).split(" ").join(""),
             },
-        'bstar':"."+line1.substring(53, 61),
+        'bstar':"."+line1.substring(53, 61).split(" ").join(""),
         'ephem_type':line1.substring(62,63),
         'el_num':line1.substring(64, 68),
         'check1':line1.substring(68, 69),
         'inclination':line2.substring(8,16),
         'r_ascension':line2.substring(17,25),
-        'eccentricity':'.'+line2.substring(26,33),
+        'eccentricity':'.'+line2.substring(26,33).split(" ").join(""),
         'perigee':line2.substring(34, 42),
         'm_anomaly':line2.substring(43,51),
         'm_motion':line2.substring(52,63),
@@ -69,3 +71,32 @@ function parseData(line1, line2) {
     }
 }
 
+function concatData(sats) {
+    let sat_names = Object.getOwnPropertyNames(sats)
+
+    let out = [];
+
+    sat_names.forEach(sat_name => {
+        out[sat_name] = concat(sats[sat_name]);
+    });
+    return out;
+}
+
+function concat(sat_data) {
+    let names = Object.getOwnPropertyNames(sat_data[0])
+    let sat = {};
+
+    names.forEach(field => {
+        sat[field] = createList(sat_data, field);
+    });
+
+    return sat;
+}
+
+function createList(data, field) {
+    let list = [];
+    data.forEach(el => {
+        list.push(el[field]);
+    });
+    return list
+}
