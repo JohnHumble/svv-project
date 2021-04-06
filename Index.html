@@ -1,41 +1,34 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang='en'>
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset='UTF-8'>
     <title>Visualizer</title>
 
-    <link rel="stylesheet" href="style.css" />
-    <link rel="icon" href="data:," />
+    <link rel='stylesheet' href='style.css' />
+    <link rel='icon' href='data:,' />
 
     <!--3rd Party Libs-->
-    <!-- <script src='https://d3js.org/d3.v5.min.js'></script> -->
-    <script src="script/d3.js"></script>
-    <script src="script/topojson.min.js"></script>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <!-- <script src='script/d3.js'></script> -->
+    <script src='script/topojson.min.js'></script>
 
     <!-- Our Code -->
+    <script src='script/map.js'defer></script>
+    <script src='script/map_loader.js' defer></script>
     <script src='script/read_data.js' defer></script>
-    <script src='script/map.js'></script>
-    <script src='script/map_loader.js'></script>
 </head>
 
 <body>
 
     <h3>Upload a file</h3>
-    <input type="file" id="data">
+    <input type='file' id='data'>
 
-    <div id="map-view" class="view">
-        <h2>World Map</h2>
-
-        <svg width="400" height="30">
-            <!-- Legend / Controls -->
-        </svg>
-
-        <svg width="900" height="600">
-            <g id="map"></g>
-            <g id="points"></g>
-        </svg>
-    </div>
+    <h3>World Map</h3>
+    <svg width='900' height='600' id='map'>
+        <g id='base'></g>
+        <g id='grounds'></g>
+    </svg>
 
 </body>
 

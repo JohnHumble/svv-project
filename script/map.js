@@ -4,7 +4,7 @@ class Map {
    * Creates a Map Object
    */
   constructor() {
-    this.projection = d3.geoEquirectangular().scale(150).translate([400, 350]);
+    this.projection = d3.geoEquirectangular().scale(150);
 
   }
 
@@ -15,13 +15,49 @@ class Map {
 
   }
 
-  updateMap(worldcupData) {
+  updateSatellites(satelliteData) {
 
     //Clear any previous selections;
     this.clearMap();
 
-    console.log(worldcupData)
+    console.log(satelliteData)
 
+  }
+
+  generateCoverageCircle(long, lat) {
+    var path = d3.geoPath().projection(this.projection)
+
+    const circumference = 6371000 * Math.PI * 2;
+    let angle = 160934 / circumference * 360;
+    var circle = d3.geoCircle().center([long, lat]).radius(angle);
+
+    return path(circle())
+  }
+
+  updateGroundStations(groundStations) {
+
+    // Draw the actual stations
+    let stations = d3.selectAll('#grounds')
+      .selectAll('circle.groundStation')
+      .data(groundStations)
+
+    stations.join('circle')
+      .attr('r', 2)
+      .attr('transform', d => `translate(${this.projection([d.long, d.lat])})`)
+      .classed('groundStation', true)
+
+    stations.join('text')
+      .attr('transform', d => `translate(${this.projection([d.long, d.lat])})`)
+      .text(d => d.name)
+
+    let coverage = d3.selectAll('#grounds')
+      .selectAll('circle.coverage')
+      .data(groundStations)
+
+    coverage.join('path')
+      .attr('d', d => this.generateCoverageCircle(d.long, d.lat))
+      .attr('stroke', 'red')
+      .attr('fill', 'none')
   }
 
   /**
@@ -43,7 +79,7 @@ class Map {
         // Need to convert the topoJSON file to geoJSON.
         var geojson = topojson.feature(data, data.objects.countries);
 
-        var graticule = d3.select('#map')
+        var graticule = d3.select('#base')
           .selectAll('path.grat')
           .data([graticuleGenerator()]);
 
@@ -55,7 +91,7 @@ class Map {
           .classed('grat', true)
           .attr('d', pathGenerator);
 
-        var map = d3.select('#map')
+        var map = d3.select('#base')
           .selectAll('path.countries')
           .data(geojson.features);
 

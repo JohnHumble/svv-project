@@ -35,6 +35,7 @@ function readFile(file){
     }
     fr.readAsText(file);
     console.log(sats)
+    worldMap.updateSatellites(sats)
     return sats
 }
 
