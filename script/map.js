@@ -18,9 +18,16 @@ class Map {
   updateSatellites(satelliteData) {
 
     //Clear any previous selections;
-    this.clearMap();
-
     console.log(satelliteData)
+    let points = d3.selectAll('#grounds')
+      .selectAll('circle.groundStation')
+      .data(satelliteData)
+  
+    points.join('circle')
+      .attr('r', 2)
+      .attr('transform', d => `translate(${this.projection([d.long, d.lat])})`)
+      .classed('groundStation', true)
+      console.log('dub')
 
   }
 
@@ -35,6 +42,8 @@ class Map {
   }
 
   updateGroundStations(groundStations) {
+
+    console.log(groundStations);
 
     // Draw the actual stations
     let stations = d3.selectAll('#grounds')
