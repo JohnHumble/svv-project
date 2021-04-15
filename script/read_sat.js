@@ -11,27 +11,20 @@ fileSelector.addEventListener('change', (event) => {
   // add to world map
   lla = extractLLA(satellites)
 
-  //worldMap.updateSatellites(lla)
-
-  console.log("doing the thing")
-  // lla.forEach((pos) => {
-  //   console.log("foo")
-  //   let longitude = pos.longitude
-  //   let latitude  = pos.latitude
-
-  //   // save point location
-  
-
-  //   // todo, make this a thing
-  //   let circle = d3.geoCircle().center([longitude, latitude]).radius(angle);
-  //   d3.select("map").append(circle);
-  //   console.log("circle")
-  //   console.log(circle)
-  // });
-
-
 })
 
+// debugging remove later
+let l1 = "1 25544U 98067A   21083.89642366  .00001325  00000-0  32280-4 0  9998"
+let l2 = "2 25544  51.6458  39.6291 0003151 145.1042 249.9106 15.48938267275534"
+let sat = satellite.twoline2satrec(l1, l2)
+
+worldMap.updateSatellites(extractLLA([sat]))
+
+/**
+ * Reads a file of 2 line satellite data
+ * @param {*} file the file with the satellite data
+ * @returns 
+ */
 function readSat(file) {
   let fr = new FileReader();
 
@@ -40,10 +33,6 @@ function readSat(file) {
     let res = e.target.result;
 
     let lines = res.split("\n")
-
-    // check to see what kind of data to use
-    // let mult_sat = lines[0].length == 69;
-    // let inc = 2 + mult_sat;
 
     for (let i = 0; i < lines.length; i += 3) {
       console.log(lines[i + 1])
@@ -54,38 +43,63 @@ function readSat(file) {
     // add to the graph
     let lla = extractLLA(sats)
 
+    //console.log(p)
     worldMap.updateSatellites(lla)
-    
   }
 
   fr.readAsText(file);
   console.log(sats)
   worldMap.updateSatellites(sats)
-  return sats
 }
 
-function extractLLA(sattrecs) {
-  // gets the latitude, longitude, and altitude of the satellite from the sat data
+/**
+ * Will take the data output from satellite.twoline2satrec() and extract the latitude, longitude and latitude.
+ * @param {*} sattrecs data from satelliet.twoline2satrec()
+ * @param {*} t_ahead the amount of time to look ahead for each satellite for propagation
+ * @param {*} step the step size to propagate
+ * @returns 
+ */
+function extractLLA(sattrecs, t_ahead=10, step=1) {
 
   lla = [];
   // go through all the sats
   sattrecs.forEach(sat => {
-    console.log(sat)
 
-    let positionAndVelocity = satellite.propagate(sat, new Date());
+    let sat_loc = propagate_sat(sat, 10, 1)
+    sat_loc.forEach(loc => {
+      lla.push(loc);
+    });
 
-    let gmst = satellite.gstime(new Date());
-    // get position geodetic
-    let pos = satellite.eciToGeodetic(positionAndVelocity.position, gmst);
+  });
 
-    lla.push({
+  // return new data type
+  return lla;
+}
+
+/**
+ * Propagate a single satellite and returns the lla for that satellite
+ * @param {*} sat 
+ * @param {*} hours_ahead 
+ * @param {*} step 
+ * @returns a list of objects with the latitude, longitude, altitude, and name for
+ */
+function propagate_sat(sat, hours_ahead, step) {
+  let out = [];
+  for (let i = 0; i < hours_ahead; i += step) {
+
+    let t_ahead = new Date();
+    t_ahead.setTime(i * 50000)
+    
+    let pos_vel = satellite.propagate(sat, t_ahead);
+    let gmst = satellite.gstime(t_ahead);
+    let pos = satellite.eciToGeodetic(pos_vel.position, gmst);
+
+    out.push({
       'lat':satellite.degreesLat(pos.latitude),
       'long':satellite.degreesLong(pos.longitude),
       'alt':pos.height,
       'name':sat.name,
     })
-  });
-
-  // return new data type
-  return lla;
+  }
+  return out;
 }
