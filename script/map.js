@@ -16,11 +16,34 @@ class Map {
   }
 
   updateSatellites(satelliteData) {
+    // get the previous location
+    let prev = satelliteData[0]
+    // cycle through each of the location points
+    for (let i = 1; i < satelliteData.length; i++) {
+      // get the next location
+      let next = satelliteData[i];
+      // create link object
+      let link = {
+        type: "LineString",
+        coordinates: [[prev.long, prev.lat], [next.long, next.lat]]
+      } 
+      // get projection
+      let path = d3.geoPath()
+        .projection(this.projection)
+      
+      // select the plot
+      let svg = d3.select("svg")
+      
+      // append the link
+      svg.append("path")
+      .attr("d", path(link))
+      .style("fill", "none")
+      .style("stroke", "blue")
+      .style("stroke-width", 1.5)
 
-    //Clear any previous selections;
-    this.clearMap();
-
-    console.log(satelliteData)
+      // set previous to next
+      prev = next
+    }
 
   }
 
@@ -35,6 +58,8 @@ class Map {
   }
 
   updateGroundStations(groundStations) {
+
+    console.log(groundStations);
 
     // Draw the actual stations
     let stations = d3.selectAll('#grounds')
