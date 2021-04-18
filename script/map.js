@@ -6,6 +6,9 @@ class Map {
   constructor() {
     this.projection = d3.geoEquirectangular().scale(150);
 
+    this.groundStations = [];
+    this.satellites = [];
+
   }
 
   /**
@@ -15,25 +18,60 @@ class Map {
 
   }
 
+  showVisibility() {
+    console.log(this.groundStations)
+    console.log(this.satellites)
+    let vis = visibility(this.groundStations, this.satellites)
+
+    console.log(vis)
+
+    vis.forEach(g_station => {
+      g_station.forEach(sat_vis => {
+        console.log(sat_vis);
+        if (sat_vis.length > 1) {
+
+          let lla = [];
+          sat_vis.forEach(s => {
+            lla.push(s.lla);
+          });
+
+          this.plotLine(lla);
+        }
+      })
+    });
+  }
+
   updateSatellites(satelliteData) {
+
+    // convert data
+    let lla = [];
+    satelliteData.forEach(sat => {
+      console.log(sat);
+      lla.push(format_lla(sat));
+    });
+
+    this.plotLine(lla);
+  }
+
+  plotLine(lla_data){
     // get the previous location
-    let prev = satelliteData[0]
+    let prev = lla_data[0]
     // cycle through each of the location points
-    for (let i = 1; i < satelliteData.length; i++) {
+    for (let i = 1; i < lla_data.length; i++) {
       // get the next location
-      let next = satelliteData[i];
+      let next = lla_data[i];
       // create link object
       let link = {
         type: "LineString",
         coordinates: [[prev.long, prev.lat], [next.long, next.lat]]
-      } 
+      }
       // get projection
       let path = d3.geoPath()
         .projection(this.projection)
-      
+
       // select the plot
       let svg = d3.select("svg")
-      
+
       // append the link
       svg.append("path")
       .attr("d", path(link))
@@ -44,7 +82,6 @@ class Map {
       // set previous to next
       prev = next
     }
-
   }
 
   generateCoverageCircle(long, lat) {
@@ -58,7 +95,7 @@ class Map {
   }
 
   updateGroundStations(groundStations) {
-
+    this.groundStations = groundStations;
     console.log(groundStations);
 
     // Draw the actual stations
@@ -131,6 +168,8 @@ class Map {
           .attr('d', pathGenerator)
           .attr('id', d => d.id)
       });
+
+      this.showVisibility();
 
   }
 
