@@ -19,6 +19,7 @@ fileSelector.addEventListener('change', (event) => {
 let l1 = "1 25544U 98067A   21083.89642366  .00001325  00000-0  32280-4 0  9998"
 let l2 = "2 25544  51.6458  39.6291 0003151 145.1042 249.9106 15.48938267275534"
 let sat = satellite.twoline2satrec(l1, l2)
+console.log(sat);
 
 worldMap.satellites = [sat]
 //worldMap.showVisibility();
@@ -98,13 +99,14 @@ function propagate_sat(sat, hours_ahead, step) {
   let times = [];
   for (let i = 0; i < hours_ahead; i += step) {
 
-    let t_ahead = new Date();
-    t_ahead.setTime(i * 50000)
+    //console.log(sat);
+    let t_ahead = new Date(i * 60 * 1000);
+    //t_ahead.setTime(i * 50000)
     
     let pos_vel = satellite.propagate(sat, t_ahead);
     let gmst = satellite.gstime(t_ahead);
     let pos = satellite.eciToGeodetic(pos_vel.position, gmst);
-    times.push(gmst);
+    times.push(gmst + sat.jdsatepoch);
 
     out.push(pos);
     // console.log(pos)
