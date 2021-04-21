@@ -19,19 +19,20 @@ class Map {
   }
 
   showVisibility() {
-    console.log(this.groundStations)
-    console.log(this.satellites)
+    // console.log(this.groundStations)
+    // console.log(this.satellites)
     let vis = visibility(this.groundStations, this.satellites)
 
     console.log(vis)
 
     vis.forEach(g_station => {
-      g_station.forEach(sat_vis => {
+      g_station.sat_vis.forEach(sat_vis => {
         console.log(sat_vis);
-        if (sat_vis.length > 1) {
+        if (sat_vis.visible.length > 1) {
 
           let lla = [];
-          sat_vis.forEach(s => {
+          sat_vis.visible.forEach(s => {
+            console.log(s);
             lla.push(s.lla);
           });
 
@@ -39,6 +40,8 @@ class Map {
         }
       })
     });
+
+    addVisibilityPlots(vis);
   }
 
   updateSatellites(satelliteData) {
@@ -70,14 +73,14 @@ class Map {
         .projection(this.projection)
 
       // select the plot
-      let svg = d3.select("svg")
+      let svg = d3.select("#map")
 
       // append the link
       svg.append("path")
-      .attr("d", path(link))
-      .style("fill", "none")
-      .style("stroke", "blue")
-      .style("stroke-width", 1.5)
+        .attr("d", path(link))
+        .style("fill", "none")
+        .style("stroke", "blue")
+        .style("stroke-width", 1.5)
 
       // set previous to next
       prev = next

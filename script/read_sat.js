@@ -22,7 +22,7 @@ let sat = satellite.twoline2satrec(l1, l2)
 
 worldMap.satellites = [sat]
 //worldMap.showVisibility();
-//worldMap.updateSatellites(extractLLA([sat], 100, 1))
+worldMap.updateSatellites(extractLLA([sat], 100, 1))
 
 /**
  * Reads a file of 2 line satellite data
@@ -48,12 +48,18 @@ function readSat(file) {
     let lla = extractLLA(sats)
 
     //console.log(p)
-    worldMap.updateSatellites(lla)
+    //worldMap.updateSatellites(lla)
+
+    worldMap.satellite = sats;
+
+    worldMap.showVisibility();
   }
 
   fr.readAsText(file);
-  console.log(sats)
-  worldMap.updateSatellites(sats)
+  //console.log(sats)
+
+
+  //worldMap.updateSatellites(sats)
 }
 
 /**
@@ -70,7 +76,7 @@ function extractLLA(sattrecs, t_ahead=10, step=1) {
   sattrecs.forEach(sat => {
 
     let sat_loc = propagate_sat(sat, t_ahead, step)
-    sat_loc.forEach(loc => {
+    sat_loc.pos.forEach(loc => {
       lla.push(loc);
     });
 
@@ -89,20 +95,22 @@ function extractLLA(sattrecs, t_ahead=10, step=1) {
  */
 function propagate_sat(sat, hours_ahead, step) {
   let out = [];
+  let times = [];
   for (let i = 0; i < hours_ahead; i += step) {
 
     let t_ahead = new Date();
     t_ahead.setTime(i * 50000)
-
+    
     let pos_vel = satellite.propagate(sat, t_ahead);
     let gmst = satellite.gstime(t_ahead);
     let pos = satellite.eciToGeodetic(pos_vel.position, gmst);
+    times.push(gmst);
 
     out.push(pos);
     // console.log(pos)
 
-    let lla2 = format_lla(pos);
-    let lla3 = lla2geo(lla2);
+    // let lla2 = format_lla(pos);
+    // let lla3 = lla2geo(lla2);
     // console.log(pos.longitude - lla3.longitude);
     // console.log(pos.latitude - lla3.latitude);
 
@@ -113,7 +121,7 @@ function propagate_sat(sat, hours_ahead, step) {
     //   'name':sat.name,
     // })
   }
-  return out;
+  return {'pos':out, 'time':times};
 }
 
 function format_lla(pos) {
