@@ -69,11 +69,15 @@ function visibility(ground_sites, sat) {
   return vis;
 }
 
+const TIME_OFF = 440;
+
 function addVisibilityPlots(vis) {
+
+  let div_width = getSize(vis) * TIME_OFF * 2.2;
   // get the div and add new svg
   let svg = d3.select("#visplots")
               .append('svg')
-              .attr('width', 1280)
+              .attr('width', div_width)
               .attr('height', 1280);
 
   // get earliest window
@@ -85,20 +89,27 @@ function addVisibilityPlots(vis) {
   vis.forEach(g_station => {
     for (let i = 0; i < g_station.sat_vis.length; i++) {
       console.log(off)
-      createVisPlot(g_station.sat_vis[i], svg, i * 16 + off, start, g_station.name,name_off=name_off);
+      createVisPlot(g_station.sat_vis[i], svg, i * 16 + off, start, g_station.name,div_width,name_off);
     }
     off += g_station.sat_vis.length * 16;
   });
+}
 
-  // // add the x axis time plot
-  // for (let i = 0; i < 10; i++) {
-  //   string = satellite.invjday(start).toString()
-  //   svg.append('text')
-  //     .attr('x', name_off + (i * 1000))
-  //     .attr('y', off + 16)
-  //     .text(string);
 
-  // }
+function getSize(vis) {
+  let size = 0;
+
+  // find maximum length of windows
+  vis.forEach(g_station => {
+    g_station.sat_vis.forEach(sat => {
+      let s_l = sat.window.length;
+      if (s_l > size) {
+        size = s_l;
+      }
+    })
+  });
+
+  return size;
 }
 
 function getStart(vis) {
@@ -120,15 +131,16 @@ function getStart(vis) {
   return start;
 }
 
-function createVisPlot(vis, svg, dy, start, name, name_off=100, width=10000) {
+function createVisPlot(vis, svg, dy, start, name,div=1280, name_off=100, width=10000) {
   // create time display data
-  console.log(vis);
-  console.log(dy);
+  // console.log(vis);
+  // console.log(dy);
+  console.log(div)
 
   svg.append('rect')
     .attr('x', name_off)
     .attr('y', dy)
-    .attr('width', 1280)
+    .attr('width', div)
     .attr('height', 16)
     .attr('stroke', 'black')
     .attr('fill', '#dddddd')
@@ -145,7 +157,7 @@ function createVisPlot(vis, svg, dy, start, name, name_off=100, width=10000) {
       // console.log(dt);
       // console.log(dy);
       
-      const TIME_OFF = 440;
+      
       
       // append the visibility window
       let xloc = (win[0] - start) * width + name_off
