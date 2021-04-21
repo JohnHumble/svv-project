@@ -90,15 +90,15 @@ function addVisibilityPlots(vis) {
     off += g_station.sat_vis.length * 16;
   });
 
-  // add the x axis time plot
-  for (let i = 0; i < 10; i++) {
-    string = satellite.invjday(start).toString()
-    svg.append('text')
-      .attr('x', name_off + (i * 1000))
-      .attr('y', off + 16)
-      .text(string);
+  // // add the x axis time plot
+  // for (let i = 0; i < 10; i++) {
+  //   string = satellite.invjday(start).toString()
+  //   svg.append('text')
+  //     .attr('x', name_off + (i * 1000))
+  //     .attr('y', off + 16)
+  //     .text(string);
 
-  }
+  // }
 }
 
 function getStart(vis) {
@@ -136,58 +136,61 @@ function createVisPlot(vis, svg, dy, start, name, name_off=100, width=10000) {
   let x_off = name_off;
   vis.window.forEach(win => {
     let dt = win[1] - win[0];
-    // console.log(win[0])
 
-    // console.log(dt);
-    // console.log(dy);
-
-    const TIME_OFF = 440;
-    let xloc = (win[0] - start) * width + name_off
-    svg.append('rect')
+    if (!isNaN(dt)) {
+      
+      
+      // console.log(win[0])
+      
+      // console.log(dt);
+      // console.log(dy);
+      
+      const TIME_OFF = 440;
+      
+      // append the visibility window
+      let xloc = (win[0] - start) * width + name_off
+      svg.append('rect')
       .attr('x', x_off + TIME_OFF)
       .attr('y', dy)
       .attr('width', dt * width)
       .attr('height', 16)
       .attr('stroke', 'black')
       .attr('fill', '#69a3b2')
-
-    // append the time string
-    let start_time = satellite.invjday(win[0])
-    svg.append('text')
+      
+      // append the time string
+      let start_time = satellite.invjday(win[0])
+      svg.append('text')
       .attr('x', x_off)
       .attr('y', dy + 16)
       .text(start_time)
-
-    // append the end time
-    let end_time = satellite.invjday(win[1])
-    svg.append('text')
-    .attr('x', x_off + TIME_OFF + dt * width + 5)
-    .attr('y', dy + 16)
-    .text(formatTimeHMS(end_time))
-
-    x_off += TIME_OFF + 70 + dt * width
+      
+      // append the end time
+      let end_time = satellite.invjday(win[1])
+      svg.append('text')
+      .attr('x', x_off + TIME_OFF + dt * width + 5)
+      .attr('y', dy + 16)
+      .text(end_time)
+      
+      svg.append('text')
+        .attr('x', x_off + TIME_OFF)
+        .attr('y', dy + 16)
+        .text(((end_time - start_time) / 1000 / 60 ) + ' min')
+      console.log(x_off + TIME_OFF + dt * width + 5)
+        
+      x_off += TIME_OFF + TIME_OFF + dt * width
+    
+    }
   });
-
+  
   // add a name
   svg.append('text')
-    .attr('x', 0)
-    .attr('y', dy + 16)
-    .text(name);
-
+  .attr('x', 0)
+  .attr('y', dy + 16)
+  .text(name);
+  
   // plot visibility data (visibility time)
 }
 
 function formatTimeHMS(time) {
   return time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds();
-}
-
-function sidereal2UTC(sidereal) {
-  // convert the sidereal days into solar days
-  let t_diff = new Date();
-  t_diff.setHours(23,56,04);
-
-  // number of solar days since 
-  let solar_day = t_diff.getUTCDay() * sidereal;
-
-
 }
