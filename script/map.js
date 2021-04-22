@@ -23,16 +23,16 @@ class Map {
     // console.log(this.satellites)
     let vis = visibility(this.groundStations, this.satellites)
 
-    console.log(vis)
+    // console.log(vis)
 
     vis.forEach(g_station => {
       g_station.sat_vis.forEach(sat_vis => {
-        console.log(sat_vis);
+        // console.log(sat_vis);
         if (sat_vis.visible.length > 1) {
 
           let lla = [];
           sat_vis.visible.forEach(s => {
-            console.log(s);
+            // console.log(s);
             lla.push(s.lla);
           });
 
@@ -49,7 +49,7 @@ class Map {
     // convert data
     let lla = [];
     satelliteData.forEach(sat => {
-      console.log(sat);
+      // console.log(sat);
       lla.push(format_lla(sat));
     });
 
@@ -87,19 +87,19 @@ class Map {
     }
   }
 
-  generateCoverageCircle(long, lat) {
-    var path = d3.geoPath().projection(this.projection)
+  // generateCoverageCircle(long, lat) {
+  //   var path = d3.geoPath().projection(this.projection)
 
-    const circumference = 6371000 * Math.PI * 2;
-    let angle = 160934 / circumference * 360;
-    var circle = d3.geoCircle().center([long, lat]).radius(angle);
+  //   const circumference = 6371000 * Math.PI * 2;
+  //   let angle = 160934 / circumference * 360;
+  //   var circle = d3.geoCircle().center([long, lat]).radius(angle);
 
-    return path(circle())
-  }
+  //   return path(circle())
+  // }
 
   updateGroundStations(groundStations) {
     this.groundStations = groundStations;
-    console.log(groundStations);
+    // console.log(groundStations);
 
     // Draw the actual stations
     let stations = d3.selectAll('#grounds')
@@ -119,10 +119,15 @@ class Map {
       .selectAll('circle.coverage')
       .data(groundStations)
 
-    coverage.join('path')
-      .attr('d', d => this.generateCoverageCircle(d.long, d.lat))
-      .attr('stroke', 'red')
-      .attr('fill', 'none')
+    // coverage.join('path')
+    //   .attr('d', d => this.generateCoverageCircle(d.long, d.lat))
+    //   .attr('stroke', 'red')
+    //   .attr('fill', 'none')
+  }
+
+  updateObscura(clouds) {
+    this.clouds = clouds
+    console.log("Clouds", clouds)
   }
 
   /**

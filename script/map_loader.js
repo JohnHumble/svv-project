@@ -12,3 +12,7 @@ d3.csv("data/groundstations.csv")
     worldMap.updateGroundStations(stations)
   });
 
+d3.json("data/clouds.json")
+  .then(function (clouds) {
+    worldMap.updateObscura(clouds)
+  })
