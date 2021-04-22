@@ -1,3 +1,5 @@
+// pi
+const PI = 3.141592653589793238462643;
 
 // read in the data found in stations.txt
 const fileSelector = document.getElementById("data");
@@ -17,8 +19,11 @@ fileSelector.addEventListener('change', (event) => {
 let l1 = "1 25544U 98067A   21083.89642366  .00001325  00000-0  32280-4 0  9998"
 let l2 = "2 25544  51.6458  39.6291 0003151 145.1042 249.9106 15.48938267275534"
 let sat = satellite.twoline2satrec(l1, l2)
+console.log(sat);
 
-worldMap.updateSatellites(extractLLA([sat]))
+worldMap.satellites = [sat]
+//worldMap.showVisibility();
+worldMap.updateSatellites(extractLLA([sat], 100, 1))
 
 /**
  * Reads a file of 2 line satellite data
@@ -44,12 +49,18 @@ function readSat(file) {
     let lla = extractLLA(sats)
 
     //console.log(p)
-    worldMap.updateSatellites(lla)
+    //worldMap.updateSatellites(lla)
+
+    worldMap.satellite = sats;
+
+    worldMap.showVisibility();
   }
 
   fr.readAsText(file);
-  console.log(sats)
-  worldMap.updateSatellites(sats)
+  //console.log(sats)
+
+
+  //worldMap.updateSatellites(sats)
 }
 
 /**
@@ -65,8 +76,8 @@ function extractLLA(sattrecs, t_ahead=10, step=1) {
   // go through all the sats
   sattrecs.forEach(sat => {
 
-    let sat_loc = propagate_sat(sat, 10, 1)
-    sat_loc.forEach(loc => {
+    let sat_loc = propagate_sat(sat, t_ahead, step)
+    sat_loc.pos.forEach(loc => {
       lla.push(loc);
     });
 
@@ -85,21 +96,53 @@ function extractLLA(sattrecs, t_ahead=10, step=1) {
  */
 function propagate_sat(sat, hours_ahead, step) {
   let out = [];
+  let times = [];
   for (let i = 0; i < hours_ahead; i += step) {
 
-    let t_ahead = new Date();
-    t_ahead.setTime(i * 50000)
+    //console.log(sat);
+    let t_ahead = new Date(i * 60 * 1000);
+    //t_ahead.setTime(i * 50000)
     
     let pos_vel = satellite.propagate(sat, t_ahead);
     let gmst = satellite.gstime(t_ahead);
     let pos = satellite.eciToGeodetic(pos_vel.position, gmst);
+    times.push(gmst + sat.jdsatepoch);
 
-    out.push({
-      'lat':satellite.degreesLat(pos.latitude),
-      'long':satellite.degreesLong(pos.longitude),
-      'alt':pos.height,
-      'name':sat.name,
-    })
+    out.push(pos);
+    // console.log(pos)
+
+    // let lla2 = format_lla(pos);
+    // let lla3 = lla2geo(lla2);
+    // console.log(pos.longitude - lla3.longitude);
+    // console.log(pos.latitude - lla3.latitude);
+
+    // out.push({
+    //   'lat':satellite.degreesLat(pos.latitude),
+    //   'long':satellite.degreesLong(pos.longitude),
+    //   'alt':pos.height,
+    //   'name':sat.name,
+    // })
   }
-  return out;
+  return {'pos':out, 'time':times};
 }
+
+function format_lla(pos) {
+  return ({
+    'lat':satellite.degreesLat(pos.latitude),
+    'long':satellite.degreesLong(pos.longitude),
+    'alt':pos.height,
+  })
+}
+
+function lla2geo(lla) {
+  let a = 0;
+  if (lla.alt !== undefined) {
+    a = lla.alt;
+  }
+  return ({
+    'height': a,
+    'latitude': lla.lat * PI / 180,
+    'longitude': lla.long * PI / 180,
+  })
+}
+
