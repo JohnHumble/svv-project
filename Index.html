@@ -10,13 +10,17 @@
 
     <!--3rd Party Libs-->
     <script src="https://d3js.org/d3.v6.min.js"></script>
-    <!-- <script src='script/d3.js'></script> -->
     <script src='script/topojson.min.js'></script>
+    <script src="script/satellite.min.js"></script>
 
     <!-- Our Code -->
+    <script src='script/visibility.js' defer></script>
     <script src='script/map.js'defer></script>
     <script src='script/map_loader.js' defer></script>
-    <script src='script/read_data.js' defer></script>
+  <!--
+      <script src='script/read_data.js' defer></script>
+  --> 
+    <script src='script/read_sat.js' defer></script>
 </head>
 
 <body>
@@ -28,7 +32,12 @@
     <svg width='900' height='600' id='map'>
         <g id='base'></g>
         <g id='grounds'></g>
+        <g id='satellites'></g>
     </svg>
+
+    <div id='visplots'>
+        
+    </div>
 
 </body>
 

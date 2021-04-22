@@ -6,6 +6,9 @@ class Map {
   constructor() {
     this.projection = d3.geoEquirectangular().scale(150);
 
+    this.groundStations = [];
+    this.satellites = [];
+
   }
 
   /**
@@ -15,13 +18,73 @@ class Map {
 
   }
 
+  showVisibility() {
+    // console.log(this.groundStations)
+    // console.log(this.satellites)
+    let vis = visibility(this.groundStations, this.satellites)
+
+    console.log(vis)
+
+    vis.forEach(g_station => {
+      g_station.sat_vis.forEach(sat_vis => {
+        console.log(sat_vis);
+        if (sat_vis.visible.length > 1) {
+
+          let lla = [];
+          sat_vis.visible.forEach(s => {
+            console.log(s);
+            lla.push(s.lla);
+          });
+
+          this.plotLine(lla);
+        }
+      })
+    });
+
+    addVisibilityPlots(vis);
+  }
+
   updateSatellites(satelliteData) {
 
-    //Clear any previous selections;
-    this.clearMap();
+    // convert data
+    let lla = [];
+    satelliteData.forEach(sat => {
+      console.log(sat);
+      lla.push(format_lla(sat));
+    });
 
-    console.log(satelliteData)
+    this.plotLine(lla);
+  }
 
+  plotLine(lla_data){
+    // get the previous location
+    let prev = lla_data[0]
+    // cycle through each of the location points
+    for (let i = 1; i < lla_data.length; i++) {
+      // get the next location
+      let next = lla_data[i];
+      // create link object
+      let link = {
+        type: "LineString",
+        coordinates: [[prev.long, prev.lat], [next.long, next.lat]]
+      }
+      // get projection
+      let path = d3.geoPath()
+        .projection(this.projection)
+
+      // select the plot
+      let svg = d3.select("#map")
+
+      // append the link
+      svg.append("path")
+        .attr("d", path(link))
+        .style("fill", "none")
+        .style("stroke", "blue")
+        .style("stroke-width", 1.5)
+
+      // set previous to next
+      prev = next
+    }
   }
 
   generateCoverageCircle(long, lat) {
@@ -35,6 +98,8 @@ class Map {
   }
 
   updateGroundStations(groundStations) {
+    this.groundStations = groundStations;
+    console.log(groundStations);
 
     // Draw the actual stations
     let stations = d3.selectAll('#grounds')
@@ -106,6 +171,8 @@ class Map {
           .attr('d', pathGenerator)
           .attr('id', d => d.id)
       });
+
+      this.showVisibility();
 
   }
 

@@ -1,10 +1,3 @@
-// read in the data found in stations.txt
-const fileSelector = document.getElementById("data");
-let data;
-fileSelector.addEventListener('change', (event) => {
-    console.log(event.target.files[0])
-    data = readFile(event.target.files[0])
-})
 
 // reads a file and logs the output
 function readFile(file){
