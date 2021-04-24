@@ -9,14 +9,15 @@
     <link rel='icon' href='data:,' />
 
     <!--3rd Party Libs-->
-    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src='https://d3js.org/d3.v6.min.js'></script>
     <script src='script/topojson.min.js'></script>
-    <script src="script/satellite.min.js"></script>
+    <script src='script/satellite.min.js'></script>
 
     <!-- Our Code -->
     <script src='script/visibility.js' defer></script>
     <script src='script/map.js'defer></script>
-    <script src='script/map_loader.js' defer></script>
+    <script src='script/forecast.js' defer></script>
+    <script src='script/data_loader.js' defer></script>
   <!--
       <script src='script/read_data.js' defer></script>
   --> 
@@ -29,14 +30,32 @@
     <input type='file' id='data'>
 
     <h3>World Map</h3>
-    <svg width='900' height='600' id='map'>
-        <g id='base'></g>
-        <g id='grounds'></g>
-        <g id='satellites'></g>
-    </svg>
+    <div>
+        <svg width='946' height='475' id='map'>
+            <g id='base'></g>
+            <g id='clouds'></g>
+            <g id='grounds'></g>
+            <g id='satellites'></g>
+        </svg>
+    </div>
 
-    <div id='visplots'>
-        
+    <div id='forecastControl'>
+        <p id='forecastEpoch'>Forecast Epoch: Unknown</p>
+        <p id='forecastDate'>Displayed Time: Unknown</p>
+
+        <label for='forecastIndex'>Select a time</label>
+        <input 
+            type='range' 
+            id='forecastTime' 
+            name='forecastIndex' 
+            min='0' 
+            max='384' 
+            step='3' 
+            value='0'
+            onchange='forecast.update(this.value)'>
+    </div>
+
+    <div id='visplots'>    
     </div>
 
 </body>

@@ -8,7 +8,7 @@ fileSelector.addEventListener('change', (event) => {
   // console.log(event.target.files[0])
   satellites = readSat(event.target.files[0])
 
-  console.log(satellite)
+  console.log("New Satellite", satellite)
 
   // add to world map
   lla = extractLLA(satellites)
@@ -19,7 +19,7 @@ fileSelector.addEventListener('change', (event) => {
 let l1 = "1 25544U 98067A   21083.89642366  .00001325  00000-0  32280-4 0  9998"
 let l2 = "2 25544  51.6458  39.6291 0003151 145.1042 249.9106 15.48938267275534"
 let sat = satellite.twoline2satrec(l1, l2)
-console.log(sat);
+// console.log(sat);
 
 worldMap.satellites = [sat]
 //worldMap.showVisibility();
@@ -40,8 +40,8 @@ function readSat(file) {
     let lines = res.split("\n")
 
     for (let i = 0; i < lines.length; i += 3) {
-      console.log(lines[i + 1])
-      console.log(lines[i + 2])
+      // console.log(lines[i + 1])
+      // console.log(lines[i + 2])
       sats.push(satellite.twoline2satrec(lines[i + 1], lines[i + 2]));
     }
 
@@ -145,4 +145,3 @@ function lla2geo(lla) {
     'longitude': lla.long * PI / 180,
   })
 }
-
