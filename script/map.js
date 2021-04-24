@@ -110,7 +110,7 @@ class Map {
 
   updateObscura(clouds) {
     this.clouds = clouds
-    // console.log("Clouds", clouds)
+    console.log("Clouds", clouds)
 
     // console.log("There are", Object.keys(clouds).length, "keys")
     // console.log("The", cloudIndex, "-th cloud header is", clouds[cloudIndex].header)
@@ -136,7 +136,7 @@ class Map {
     let mapWidth = Math.floor(mapDims.width)
     let mapHeight = Math.floor(mapDims.height)
 
-    // console.log(`map size (${mapWidth}, ${mapHeight})`)
+    console.log(`map size (${mapWidth}, ${mapHeight})`)
 
     // Grid points do not line up exactly with lat / long, but they should be 
     // evenly distributed, so we should be able to solve x * 2x = total points 
@@ -151,14 +151,14 @@ class Map {
 
     d3.select('#clouds')
       .selectAll('rect')
-      .data(averages)
+      .data(clouds)
       .join('rect')
       .attr('x', (_, i) => 10 + (i % dataWidth) * rectWidth - 1)
       .attr('y', (_, i) => 10 + Math.floor(i / dataWidth) * rectHeight)
       .attr('width', rectWidth + 2)
       .attr('height', rectHeight)
       .style('fill', 'white')
-      .style('fill-opacity', d => 1 - (d / 100))
+      .style('fill-opacity', d => d / 100)
   }
 
   /**
@@ -169,13 +169,10 @@ class Map {
 
     // Draw the background.
     var pathGenerator = d3.geoPath()
-      .projection(this.projection);
+      .projection(this.projection)
 
     // Make sure and add gridlines to the map.
     var graticuleGenerator = d3.geoGraticule();
-
-    // Need to convert the topoJSON file to geoJSON.
-    var geojson = topojson.feature(world, world.objects.countries);
 
     // Draw the graticule
     d3.select('#base')
@@ -188,7 +185,7 @@ class Map {
     // Draw the country shapes
     d3.select('#base')
       .selectAll('path.countries')
-      .data(geojson.features)
+      .data(world.features)
       .join('path')
       .classed('countries', true)
       .attr('d', pathGenerator)
@@ -196,6 +193,19 @@ class Map {
 
     this.showVisibility();
 
+    // Need to convert the topoJSON file to geoJSON.
+    // var geojson = topojson.feature(world, world.objects.countries);
+
+    // console.log(geojson)
+
+    // function download(content, fileName, contentType) {
+    //   var a = document.createElement("a");
+    //   var file = new Blob([content], { type: contentType });
+    //   a.href = URL.createObjectURL(file);
+    //   a.download = fileName;
+    //   a.click();
+    // }
+    // download(JSON.stringify(geojson), 'geojson.txt', 'text/plain');
   }
 
 }
