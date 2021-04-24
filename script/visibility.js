@@ -95,7 +95,6 @@ function addVisibilityPlots(vis) {
   });
 }
 
-
 function getSize(vis) {
   let size = 0;
 
