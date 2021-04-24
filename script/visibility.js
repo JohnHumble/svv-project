@@ -1,7 +1,7 @@
 
-function single_visibility(ground_site, sat, t_ahead=1000, step=1) {
+function single_visibility(ground_site, sat, t_ahead, step, start) {
 
-  let sat_locs = propagate_sat(sat, t_ahead, step);
+  let sat_locs = propagate_sat(sat, t_ahead, step, start);
 
   let visible = []
   let windows = []
@@ -50,21 +50,25 @@ function single_visibility(ground_site, sat, t_ahead=1000, step=1) {
   return {'visible':visible, 'window':windows};
 }
 
-function site_visibility(ground_site, sat) {
+function site_visibility(ground_site, sat, t_ahead, step, start) {
   let sat_visability = [];
 
   sat.forEach(sat => {
-    sat_visability.push(single_visibility(ground_site, sat));
+    sat_visability.push(single_visibility(ground_site, sat,t_ahead,step,start));
   });
   return {'sat_vis':sat_visability, 'name':ground_site.name};
 }
 
-function visibility(ground_sites, sat) {
+function visibility(ground_sites, sat, start=0, t_ahead=180, step=1) {
   let vis = [];
 
+  console.log('foo')
+
   ground_sites.forEach(site => {
-    vis.push(site_visibility(site, sat));
+    vis.push(site_visibility(site, sat,t_ahead,step,start));
   })
+
+  console.log(vis);
 
   return vis;
 }
@@ -135,7 +139,7 @@ function createVisPlot(vis, svg, dy, start, name,div=1280, name_off=100, width=1
   // create time display data
   // console.log(vis);
   // console.log(dy);
-  console.log(div)
+ // console.log(div)
 
   svg.append('rect')
     .attr('x', name_off)
@@ -150,15 +154,6 @@ function createVisPlot(vis, svg, dy, start, name,div=1280, name_off=100, width=1
     let dt = win[1] - win[0];
 
     if (!isNaN(dt)) {
-      
-      
-      // console.log(win[0])
-      
-      // console.log(dt);
-      // console.log(dy);
-      
-      
-      
       // append the visibility window
       let xloc = (win[0] - start) * width + name_off
       svg.append('rect')
@@ -187,7 +182,7 @@ function createVisPlot(vis, svg, dy, start, name,div=1280, name_off=100, width=1
         .attr('x', x_off + TIME_OFF)
         .attr('y', dy + 16)
         .text(((end_time - start_time) / 1000 / 60 ) + ' min')
-      console.log(x_off + TIME_OFF + dt * width + 5)
+    //  console.log(x_off + TIME_OFF + dt * width + 5)
         
       x_off += TIME_OFF + TIME_OFF + dt * width
     

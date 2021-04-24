@@ -23,7 +23,7 @@ console.log(sat);
 
 worldMap.satellites = [sat]
 //worldMap.showVisibility();
-worldMap.updateSatellites(extractLLA([sat], 100, 1))
+worldMap.updateSatellites(extractLLA([sat], 180, 1))
 
 /**
  * Reads a file of 2 line satellite data
@@ -59,7 +59,6 @@ function readSat(file) {
   fr.readAsText(file);
   //console.log(sats)
 
-
   //worldMap.updateSatellites(sats)
 }
 
@@ -70,13 +69,13 @@ function readSat(file) {
  * @param {*} step the step size to propagate
  * @returns 
  */
-function extractLLA(sattrecs, t_ahead=10, step=1) {
+function extractLLA(sattrecs, t_ahead=18, step=1, startTime = 0) {
 
   lla = [];
   // go through all the sats
   sattrecs.forEach(sat => {
 
-    let sat_loc = propagate_sat(sat, t_ahead, step)
+    let sat_loc = propagate_sat(sat, t_ahead, step, startTime)
     sat_loc.pos.forEach(loc => {
       lla.push(loc);
     });
@@ -94,10 +93,10 @@ function extractLLA(sattrecs, t_ahead=10, step=1) {
  * @param {*} step 
  * @returns a list of objects with the latitude, longitude, altitude, and name for
  */
-function propagate_sat(sat, hours_ahead, step) {
+function propagate_sat(sat, hours_ahead, step, start) {
   let out = [];
   let times = [];
-  for (let i = 0; i < hours_ahead; i += step) {
+  for (let i = start; i < hours_ahead; i += step) {
 
     //console.log(sat);
     let t_ahead = new Date(i * 60 * 1000);
