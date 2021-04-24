@@ -46,6 +46,8 @@ function single_visibility(ground_site, sat, t_ahead, step, start) {
     }
   }
 
+  console.log(sat.satnum);
+
   return {'visible':visible, 'window':windows};
 }
 
@@ -55,7 +57,7 @@ function site_visibility(ground_site, sat, t_ahead, step, start) {
   sat.forEach(sat => {
     sat_visability.push(single_visibility(ground_site, sat,t_ahead,step,start));
   });
-  return {'sat_vis':sat_visability, 'name':ground_site.name};
+  return {'sat_vis':sat_visability, 'name':ground_site.name, 'sats':sat};
 }
 
 function visibility(ground_sites, sat, start=0, t_ahead=180, step=1) {
@@ -74,7 +76,7 @@ function visibility(ground_sites, sat, start=0, t_ahead=180, step=1) {
 
 const TIME_OFF = 440;
 
-function addVisibilityPlots(vis) {
+function addVisibilityPlots(vis, colors=undefined) {
 
   let div_width = getSize(vis) * TIME_OFF * 2.2;
   // get the div and add new svg
@@ -89,18 +91,20 @@ function addVisibilityPlots(vis) {
   // add the station time segments
   
   let off = 18;
-  let name_off = 100;
+  let name_off = 160;
 
   addTimePlot(svg, start, name_off);
 
   vis.forEach(g_station => {
-  for (let i = 0; i < g_station.sat_vis.length; i++) {
-    // console.log(off)
-    createVisPlot(g_station.sat_vis[i], svg, i * 16 + off, start, g_station.name,div_width,name_off);
+    for (let i = 0; i < g_station.sat_vis.length; i++) {
+      // console.log(off)
+      console.log(g_station);
+      createVisPlot(g_station.sat_vis[i], svg, i * 16 + off, start, g_station.name,g_station.sats[i].satnum, '#1111FF',div_width,name_off);
   }
   off += g_station.sat_vis.length * 16;
   });
 
+  return svg;
 }
 
 function getSize(vis) {
@@ -186,7 +190,7 @@ function sidereal2min(sidereal) {
       //   .attr('y', dy + 16)
       //   .text(((end_time - start_time) / 1000 / 60 ) + ' min')
 
-function createVisPlot(vis, svg, dy, start, name,div=1280, name_off=100, width=3) {
+function createVisPlot(vis, svg, dy, start, name, satname, color='#69a3b2', div=1280, name_off=100, width=3) {
 
   // make for every 15 seconds
   let step = 15;
@@ -214,13 +218,14 @@ function createVisPlot(vis, svg, dy, start, name,div=1280, name_off=100, width=3
       // console.log("xloc");
       // console.log(xloc);
       // console.log(sidereal2min(dt));
+
       svg.append('rect')
       .attr('x', x_off + xloc)
       .attr('y', dy)
       .attr('width', sidereal2min(dt) * width)
       .attr('height', 16)
       .attr('stroke', 'black')
-      .attr('fill', '#69a3b2')
+      .attr('fill', color)
 
       x_off += TIME_OFF + TIME_OFF + dt * width
     }
@@ -230,7 +235,8 @@ function createVisPlot(vis, svg, dy, start, name,div=1280, name_off=100, width=3
   svg.append('text')
   .attr('x', 0)
   .attr('y', dy + 16)
-  .text(name);
+  .text(name + " " + satname);
+  console.log(satname);
   
   // plot visibility data (visibility time)
 }

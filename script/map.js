@@ -13,6 +13,8 @@ class Map {
     this.obscuraEpoch = "2021-04-19T00:00:00.000Z"
 
     this.lines = [];
+
+    this.visPlots = [];
   }
 
   /**
@@ -30,11 +32,13 @@ class Map {
 
     console.log("adding plots");
     console.log(vis);
-    addVisibilityPlots(vis);
+    this.visPlots.push(addVisibilityPlots(vis));
   }
 
   clearVisibility() {
-    d3.select("#visplots").select('svg').remove()
+    this.visPlots.forEach(plot => {
+      plot.remove();
+    });
   }
 
   updateSatellites(start=20, time=180, step=40) {
