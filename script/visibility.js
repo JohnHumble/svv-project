@@ -1,6 +1,5 @@
 
 function single_visibility(ground_site, sat, t_ahead, step, start) {
-
   let sat_locs = propagate_sat(sat, t_ahead, step, start);
 
   let visible = []
@@ -92,13 +91,12 @@ function addVisibilityPlots(vis) {
   let name_off = 100;
   vis.forEach(g_station => {
     for (let i = 0; i < g_station.sat_vis.length; i++) {
-      console.log(off)
+      // console.log(off)
       createVisPlot(g_station.sat_vis[i], svg, i * 16 + off, start, g_station.name,div_width,name_off);
     }
     off += g_station.sat_vis.length * 16;
   });
 }
-
 
 function getSize(vis) {
   let size = 0;
@@ -136,10 +134,6 @@ function getStart(vis) {
 }
 
 function createVisPlot(vis, svg, dy, start, name,div=1280, name_off=100, width=10000) {
-  // create time display data
-  // console.log(vis);
-  // console.log(dy);
- // console.log(div)
 
   svg.append('rect')
     .attr('x', name_off)
@@ -182,7 +176,6 @@ function createVisPlot(vis, svg, dy, start, name,div=1280, name_off=100, width=1
         .attr('x', x_off + TIME_OFF)
         .attr('y', dy + 16)
         .text(((end_time - start_time) / 1000 / 60 ) + ' min')
-    //  console.log(x_off + TIME_OFF + dt * width + 5)
         
       x_off += TIME_OFF + TIME_OFF + dt * width
     
