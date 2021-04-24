@@ -6,24 +6,15 @@ const fileSelector = document.getElementById("data");
 let data;
 fileSelector.addEventListener('change', (event) => {
   // console.log(event.target.files[0])
-  satellites = readSat(event.target.files[0])
+  readSat(event.target.files[0])
 
-  console.log("New Satellite", satellite)
+  //console.log("New Satellite", satellite)
 
   // add to world map
-  lla = extractLLA(satellites)
+ // lla = extractLLA(satellites)
 
 })
 
-// debugging remove later
-let l1 = "1 25544U 98067A   21083.89642366  .00001325  00000-0  32280-4 0  9998"
-let l2 = "2 25544  51.6458  39.6291 0003151 145.1042 249.9106 15.48938267275534"
-let sat = satellite.twoline2satrec(l1, l2)
-// console.log(sat);
-
-worldMap.satellites = [sat]
-//worldMap.showVisibility();
-worldMap.updateSatellites(extractLLA([sat], 180, 1))
 
 /**
  * Reads a file of 2 line satellite data
@@ -33,27 +24,37 @@ worldMap.updateSatellites(extractLLA([sat], 180, 1))
 function readSat(file) {
   let fr = new FileReader();
 
-  let sats = [];
   fr.onload = (e) => {
+    let sats = [];
     let res = e.target.result;
 
     let lines = res.split("\n")
 
+    //console.log(lines);
+
     for (let i = 0; i < lines.length; i += 3) {
-      // console.log(lines[i + 1])
-      // console.log(lines[i + 2])
-      sats.push(satellite.twoline2satrec(lines[i + 1], lines[i + 2]));
+      console.log(lines[i + 1])
+      console.log(lines[i + 2])
+      if (lines[i+1] != undefined) {
+        sats.push(satellite.twoline2satrec(lines[i + 1], lines[i + 2]));
+      }
     }
+    
+    console.log("new satellites made")
+    console.log(sats);
 
     // add to the graph
-    let lla = extractLLA(sats)
+    // let lla = extractLLA(sats)
 
     //console.log(p)
     //worldMap.updateSatellites(lla)
 
-    worldMap.satellite = sats;
+    worldMap.satellites = sats;
+    console.log(sats);
+    worldMap.clearLines();
+    console.log(sats);
 
-    worldMap.showVisibility();
+    //worldMap.showVisibility();
   }
 
   fr.readAsText(file);
@@ -73,6 +74,7 @@ function extractLLA(sattrecs, startTime = 0, t_ahead=18, step=1) {
 
   lla = [];
   // go through all the sats
+  //console.log(sattrecs);
   sattrecs.forEach(sat => {
 
     let sat_loc = propagate_sat(sat, t_ahead, step, startTime)
@@ -93,17 +95,24 @@ function extractLLA(sattrecs, startTime = 0, t_ahead=18, step=1) {
  * @param {*} step 
  * @returns a list of objects with the latitude, longitude, altitude, and name for
  */
-function propagate_sat(sat, hours_ahead, step, start) {
+function propagate_sat(sat, minutes_ahead, step, start) {
   let out = [];
   let times = [];
-  for (let i = start; i < hours_ahead; i += step) {
+  //console.log("doing the thing");
+  // console.log(sat);
+  // console.log(start);
+  // console.log(minutes_ahead);
+  // console.log(step);
+  for (let i = start; i < (minutes_ahead + start); i += step) {
 
-    //console.log(sat);
+    // console.log(i);
     let t_ahead = new Date(i * 60 * 1000);
     //t_ahead.setTime(i * 50000)
     
     let pos_vel = satellite.propagate(sat, t_ahead);
+    //console.log(pos_vel.position);
     let gmst = satellite.gstime(t_ahead);
+    //console.log(t_ahead);
     let pos = satellite.eciToGeodetic(pos_vel.position, gmst);
     times.push(gmst + sat.jdsatepoch);
 

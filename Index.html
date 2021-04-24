@@ -15,13 +15,14 @@
 
     <!-- Our Code -->
     <script src='script/visibility.js' defer></script>
+    <script src='script/read_sat.js' defer></script>
     <script src='script/map.js'defer></script>
     <script src='script/forecast.js' defer></script>
     <script src='script/data_loader.js' defer></script>
   <!--
       <script src='script/read_data.js' defer></script>
   --> 
-    <script src='script/read_sat.js' defer></script>
+    
 </head>
 
 <body>
@@ -30,7 +31,7 @@
     <input type='file' id='data'>
 
     <h3>World Map</h3>
-    <div>
+    <div id = 'map'>
         <svg width='946' height='475' id='map'>
             <g id='base'></g>
             <g id='clouds'></g>

@@ -81,21 +81,26 @@ function addVisibilityPlots(vis) {
   let svg = d3.select("#visplots")
               .append('svg')
               .attr('width', div_width)
-              .attr('height', 1280);
+              .attr('height', 1430);
 
   // get earliest window
   let start = getStart(vis);
 
   // add the station time segments
-  let off = 16;
+  
+  let off = 18;
   let name_off = 100;
+
+  addTimePlot(svg, start, name_off);
+
   vis.forEach(g_station => {
-    for (let i = 0; i < g_station.sat_vis.length; i++) {
-      // console.log(off)
-      createVisPlot(g_station.sat_vis[i], svg, i * 16 + off, start, g_station.name,div_width,name_off);
-    }
-    off += g_station.sat_vis.length * 16;
+  for (let i = 0; i < g_station.sat_vis.length; i++) {
+    // console.log(off)
+    createVisPlot(g_station.sat_vis[i], svg, i * 16 + off, start, g_station.name,div_width,name_off);
+  }
+  off += g_station.sat_vis.length * 16;
   });
+
 }
 
 function getSize(vis) {
@@ -133,52 +138,91 @@ function getStart(vis) {
   return start;
 }
 
-function createVisPlot(vis, svg, dy, start, name,div=1280, name_off=100, width=10000) {
+function addTimePlot(svg, start, name_off, width = 3, step=15, time = 180) {
+  // add time scale
 
-  svg.append('rect')
-    .attr('x', name_off)
+  for (let i = 0; i < time; i+=step){
+
+    // convert to sidereal day then multiply by width
+    let x = i * width;
+    // console.log("offset");
+    // console.log(i)
+    // console.log(x);
+
+    //let text = satellite.invjday(start + day);
+    let hour = Math.floor(i / 60);
+    let minute = i % 60;
+
+    let text = "" + hour +":" + minute;
+
+    svg.append('text')
+      .attr('x', name_off + x)
+      .attr('y', 16)
+      .text(text)
+  }
+}
+
+function sidereal2min(sidereal) {
+  return sidereal * 1436.068183;
+}
+//23 hours 56 minutes 4.091
+
+      // // append the time string
+      // let start_time = satellite.invjday(win[0])
+      // svg.append('text')
+      // .attr('x', x_off)
+      // .attr('y', dy + 16)
+      // .text(start_time)
+      
+      // // append the end time
+      // let end_time = satellite.invjday(win[1])
+      // svg.append('text')
+      // .attr('x', x_off + TIME_OFF + dt * width + 5)
+      // .attr('y', dy + 16)
+      // .text(end_time)
+      
+      // svg.append('text')
+      //   .attr('x', x_off + TIME_OFF)
+      //   .attr('y', dy + 16)
+      //   .text(((end_time - start_time) / 1000 / 60 ) + ' min')
+
+function createVisPlot(vis, svg, dy, start, name,div=1280, name_off=100, width=3) {
+
+  // make for every 15 seconds
+  let step = 15;
+  for (let i = 0; i < 180; i+=step) {
+    let dx = width * step;
+    let x = i * width;
+    
+    svg.append('rect')
+    .attr('x', name_off + x)
     .attr('y', dy)
-    .attr('width', div)
+    .attr('width', dx)
     .attr('height', 16)
-    .attr('stroke', 'black')
-    .attr('fill', '#dddddd')
+    .attr('stroke', '#dddddd')
+    .attr('fill', '#aaaaaa')
+  }
 
   let x_off = name_off;
   vis.window.forEach(win => {
     let dt = win[1] - win[0];
 
+
     if (!isNaN(dt)) {
       // append the visibility window
-      let xloc = (win[0] - start) * width + name_off
+      let xloc = sidereal2min(win[0] - start) * width + name_off
+      // console.log("xloc");
+      // console.log(xloc);
+      // console.log(sidereal2min(dt));
       svg.append('rect')
-      .attr('x', x_off + TIME_OFF)
+      .attr('x', x_off + xloc)
       .attr('y', dy)
-      .attr('width', dt * width)
+      .attr('width', sidereal2min(dt) * width)
       .attr('height', 16)
       .attr('stroke', 'black')
       .attr('fill', '#69a3b2')
-      
-      // append the time string
-      let start_time = satellite.invjday(win[0])
-      svg.append('text')
-      .attr('x', x_off)
-      .attr('y', dy + 16)
-      .text(start_time)
-      
-      // append the end time
-      let end_time = satellite.invjday(win[1])
-      svg.append('text')
-      .attr('x', x_off + TIME_OFF + dt * width + 5)
-      .attr('y', dy + 16)
-      .text(end_time)
-      
-      svg.append('text')
-        .attr('x', x_off + TIME_OFF)
-        .attr('y', dy + 16)
-        .text(((end_time - start_time) / 1000 / 60 ) + ' min')
-        
+
       x_off += TIME_OFF + TIME_OFF + dt * width
-    
     }
   });
   
