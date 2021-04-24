@@ -1,4 +1,4 @@
 # ignore raw weather data
 data/clouds-raw/
+data/clouds/
 data/grib*
-

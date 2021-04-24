@@ -48,7 +48,7 @@ class Forecast {
 
     var fileIndex = value.toString().padStart(3, '0');
 
-    d3.json(`data/clouds/clouds_0000_${fileIndex}.json`)
+    d3.json(`data/clouds-processed/clouds_0000_${fileIndex}.json`)
       .then(function (clouds) {
         worldMap.updateObscura(clouds)
       });

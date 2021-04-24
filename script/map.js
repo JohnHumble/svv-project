@@ -106,15 +106,6 @@ class Map {
     stations.join('text')
       .attr('transform', d => `translate(${this.projection([d.long, d.lat])})`)
       .text(d => d.name)
-
-    let coverage = d3.selectAll('#grounds')
-      .selectAll('circle.coverage')
-      .data(groundStations)
-
-    // coverage.join('path')
-    //   .attr('d', d => this.generateCoverageCircle(d.long, d.lat))
-    //   .attr('stroke', 'red')
-    //   .attr('fill', 'none')
   }
 
   updateObscura(clouds) {
@@ -126,20 +117,20 @@ class Map {
     // console.log("with forecast time", clouds[cloudIndex].header.forecastTime)
     // console.log("with reftime", clouds[cloudIndex].header.refTime)
 
-    let numAltitudes = clouds.length
-    let numPoints = clouds[0].data.length
+    // let numAltitudes = clouds.length
+    // let numPoints = clouds[0].data.length
 
-    var averages = new Array(numPoints).fill(0)
-    for (var i = 0; i < numAltitudes; ++i) {
-      for (var j = 0; j < numPoints; ++j) {
-        averages[j] += clouds[i].data[j]
-      }
-    }
+    // var averages = new Array(numPoints).fill(0)
+    // for (var i = 0; i < numAltitudes; ++i) {
+    //   for (var j = 0; j < numPoints; ++j) {
+    //     averages[j] += clouds[i].data[j]
+    //   }
+    // }
     
-    for (var i = 0; i < averages.length; ++i) {
-      averages[i] /= numAltitudes
-    }
-    // console.log("averages", averages)
+    // for (var i = 0; i < averages.length; ++i) {
+    //   averages[i] /= numAltitudes
+    // }
+    // // console.log("averages", averages)
 
     let mapDims = d3.select('#base').node().getBoundingClientRect()
     let mapWidth = Math.floor(mapDims.width)
@@ -158,29 +149,16 @@ class Map {
     let rectWidth = (mapWidth / dataWidth);
     let rectHeight = (mapHeight / dataHeight);
 
-    var weather = d3.select('#clouds')
+    d3.select('#clouds')
       .selectAll('rect')
       .data(averages)
       .join('rect')
-        .attr('x', (_, i) => 10 + (i % dataWidth) * rectWidth - 1)
-        .attr('y', (_, i) => 10 + Math.floor(i / dataWidth) * rectHeight)
-        .attr('width', rectWidth + 2)
-        .attr('height', rectHeight)
-        .style('fill', 'white')
-        .style('fill-opacity', d => 1 - d)
-
-    // weather.exit()
-    //        .remove();
-
-    // weather.enter()
-    //        .append('rect')
-    //        .attr('x', (_, i) => 10 + (i % dataWidth) * rectWidth - 1)
-    //        .attr('y', (_, i) => 10 + Math.floor(i / dataWidth) * rectHeight)
-    //        .attr('width', rectWidth + 2)
-    //        .attr('height', rectHeight)
-    //        .style('fill', 'white')
-    //        .style('fill-opacity', d => 1 - d)
-
+      .attr('x', (_, i) => 10 + (i % dataWidth) * rectWidth - 1)
+      .attr('y', (_, i) => 10 + Math.floor(i / dataWidth) * rectHeight)
+      .attr('width', rectWidth + 2)
+      .attr('height', rectHeight)
+      .style('fill', 'white')
+      .style('fill-opacity', d => 1 - (d / 100))
   }
 
   /**
@@ -199,36 +177,22 @@ class Map {
     // Need to convert the topoJSON file to geoJSON.
     var geojson = topojson.feature(world, world.objects.countries);
 
-    var graticule = d3.select('#base')
+    // Draw the graticule
+    d3.select('#base')
       .selectAll('path.grat')
-      .data([graticuleGenerator()]);
-
-    graticule.exit()
-      .remove();
-
-    graticule = graticule.enter()
-      .append('path')
+      .data([graticuleGenerator()])
+      .join('path')
       .classed('grat', true)
       .attr('d', pathGenerator);
 
-    var countries = d3.select('#base')
+    // Draw the country shapes
+    d3.select('#base')
       .selectAll('path.countries')
-      .data(geojson.features);
-
-    countries.exit()
-      .remove();
-
-    // Assign an id to each country path
-    countries = countries.enter()
-      .append('path')
+      .data(geojson.features)
+      .join('path')
       .classed('countries', true)
-      .merge(countries)
       .attr('d', pathGenerator)
       .attr('id', d => d.id)
-
-    // console.log(graticule.node().getBoundingClientRect())
-
-    // var map = d3.select('#map')
 
     this.showVisibility();
 
