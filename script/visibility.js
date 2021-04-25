@@ -49,7 +49,7 @@ function site_visibility(ground_site, sat, t_ahead, step, start) {
   let sat_visability = [];
 
   sat.forEach(sat => {
-    sat_visability.push(single_visibility(ground_site, sat, t_ahead, step, start));
+    sat_visability.push(single_visibility(ground_site, sat['tle'], t_ahead, step, start));
   });
   return { 'sat_vis': sat_visability, 'name': ground_site.name, 'sats': sat };
 }
@@ -72,7 +72,7 @@ function addVisibilityPlots(vis, colors = undefined) {
   // get the div and add new svg
   let svg = d3.select("#visplots")
     .append('svg')
-    .attr('width', div_width)
+    .attr('width', 966)
     .attr('height', 1430);
 
   // get earliest window
@@ -88,15 +88,15 @@ function addVisibilityPlots(vis, colors = undefined) {
   vis.forEach(g_station => {
     for (let i = 0; i < g_station.sat_vis.length; i++) {
       // console.log(off)
-      console.log(g_station);
+      // console.log(g_station);
       createVisPlot(
         g_station.sat_vis[i], 
         svg, 
         i * 16 + off, 
         start, 
         g_station.name, 
-        g_station.sats[i].satnum, 
-        '#1111FF', 
+        g_station.sats[i].name, 
+        g_station.sats[i].color, 
         div_width, name_off);
     }
     off += g_station.sat_vis.length * 16;
@@ -209,7 +209,7 @@ function createVisPlot(vis, svg, dy, start, name, satname, color = '#69a3b2', di
     .attr('x', 0)
     .attr('y', dy + 16)
     .text(name + " " + satname);
-  console.log(satname);
+  // console.log(satname);
 }
 
 function formatTimeHMS(time) {

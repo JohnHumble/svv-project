@@ -23,21 +23,26 @@ function readSat(file) {
 
     let lines = res.split("\n")
 
-    for (let i = 0; i < lines.length; i += 3) {
-      console.log(lines[i + 1])
-      console.log(lines[i + 2])
+    const MAX_TLE_LINES = 30
+
+    for (let i = 0; i < lines.length && i < MAX_TLE_LINES; i += 3) {
+      // console.log(lines[i + 1])
+      // console.log(lines[i + 2])
       if (lines[i + 1] != undefined) {
-        sats.push(satellite.twoline2satrec(lines[i + 1], lines[i + 2]));
+        sats.push({
+          'name': lines[i],
+          'tle': satellite.twoline2satrec(lines[i + 1], lines[i + 2])
+        });
       }
     }
 
-    console.log("new satellites made")
-    console.log(sats);
+    // console.log("new satellites made")
+    // console.log(sats);
 
     worldMap.satellites = sats;
-    console.log(sats);
+    // console.log(sats);
     worldMap.clearLines();
-    console.log(sats);
+    // console.log(sats);
   }
 
   fr.readAsText(file);
@@ -56,7 +61,7 @@ function extractLLA(sattrecs, startTime = 0, t_ahead = 18, step = 1) {
 
   // go through all the sats
   sattrecs.forEach(sat => {
-    let sat_loc = propagate_sat(sat, t_ahead, step, startTime)
+    let sat_loc = propagate_sat(sat['tle'], t_ahead, step, startTime)
     sat_loc.pos.forEach(loc => {
       lla.push(loc);
     });

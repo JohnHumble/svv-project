@@ -31,8 +31,12 @@ class Map {
     });
   }
 
-  updateSatellites(start = 20, time = 180, step = 40) {
+  updateSatellites(start = 0, time = 180, step = 40) {
     // console.log("updating satellites");
+
+    for (var i = 0; i < this.satellites.length; ++i) {
+      this.satellites[i]['color'] = d3.schemeCategory10[i]
+    }
 
     // convert data
     let lla = [];
