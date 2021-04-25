@@ -140,13 +140,13 @@ function getStart(vis) {
   return start;
 }
 
-function addTimePlot(svg, start, name_off, width = 3, step = 15, time = 180) {
+function addTimePlot(svg, start, name_off, width = 1.5, step = 15, time = 180) {
 
   // add time scale
   for (let i = 0; i < time; i += step) {
 
     // convert to sidereal day then multiply by width
-    let x = i * width;
+    let x = i * width*2.5;
 
     //let text = satellite.invjday(start + day);
     let hour = Math.floor(i / 60);
@@ -166,13 +166,13 @@ function sidereal2min(sidereal) {
 }
 //23 hours 56 minutes 4.091
 
-function createVisPlot(vis, svg, dy, start, name, satname, color = '#69a3b2', div = 1280, name_off = 100, width = 3) {
+function createVisPlot(vis, svg, dy, start, name, satname, color = '#69a3b2', div = 1280, name_off = 100, width = 1.5) {
 
   // make for every 15 seconds
   let step = 15;
   for (let i = 0; i < 180; i += step) {
-    let dx = width * step;
-    let x = i * width;
+    let dx = width * step * 2.5;
+    let x = i * width * 2.5;
 
     svg.append('rect')
       .attr('x', name_off + x)
