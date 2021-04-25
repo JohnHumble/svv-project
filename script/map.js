@@ -11,6 +11,10 @@ class Map {
     this.obscura = [];
 
     this.obscuraEpoch = "2021-04-19T00:00:00.000Z"
+
+    this.lines = [];
+
+    this.visPlots = [];
   }
 
   /**
@@ -20,42 +24,54 @@ class Map {
 
   }
 
-  showVisibility() {
+  showVisibility(start=0) {
+    console.log("showing visibility")
     // console.log(this.groundStations)
     // console.log(this.satellites)
-    let vis = visibility(this.groundStations, this.satellites)
+    let vis = visibility(this.groundStations, this.satellites, start)
 
-    // console.log(vis)
-
-    vis.forEach(g_station => {
-      g_station.sat_vis.forEach(sat_vis => {
-        // console.log(sat_vis);
-        if (sat_vis.visible.length > 1) {
-
-          let lla = [];
-          sat_vis.visible.forEach(s => {
-            // console.log(s);
-            lla.push(s.lla);
-          });
-
-          this.plotLine(lla);
-        }
-      })
-    });
-
-    addVisibilityPlots(vis);
+    console.log("adding plots");
+    console.log(vis);
+    this.visPlots.push(addVisibilityPlots(vis));
   }
 
-  updateSatellites(satelliteData) {
+  clearVisibility() {
+    this.visPlots.forEach(plot => {
+      plot.remove();
+    });
+  }
+
+  updateSatellites(start=20, time=180, step=40) {
+
+    // remove previous
+    //d3.select('#map').select('#satellites').select('path').remove();
+    console.log("updating satellites");
+    //console.log(this.satellites);
 
     // convert data
     let lla = [];
-    satelliteData.forEach(sat => {
-      // console.log(sat);
-      lla.push(format_lla(sat));
-    });
 
+    // let satData = extractLLA(this.satellites, start);
+
+    console.log(this.satellites);
+    let sat_data = extractLLA(this.satellites, start, time, step);
+    
+    //console.log(sat_data);
+    sat_data.forEach(sat => {
+      // console.log(sat);
+      lla.push(format_lla(sat, start));
+    });
+    //console.log(lla);
+    
     this.plotLine(lla);
+  }
+
+  clearLines() {
+    console.log('clearing lines')
+    // d3.select('#map').select('#satellites').select('path').remove();
+    this.lines.forEach(line => {
+      line.remove();
+    });
   }
 
   plotLine(lla_data){
@@ -78,7 +94,7 @@ class Map {
       let svg = d3.select("#satellites")
 
       // append the link
-      svg.append("path")
+      let n = svg.append("path")
         .attr("d", path(link))
         .style("fill", "none")
         .style("stroke", "blue")
@@ -86,6 +102,8 @@ class Map {
 
       // set previous to next
       prev = next
+
+      this.lines.push(n);
     }
   }
 

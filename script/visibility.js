@@ -1,7 +1,6 @@
 
-function single_visibility(ground_site, sat, t_ahead=100, step=1) {
-
-  let sat_locs = propagate_sat(sat, t_ahead, step);
+function single_visibility(ground_site, sat, t_ahead, step, start) {
+  let sat_locs = propagate_sat(sat, t_ahead, step, start);
 
   let visible = []
   let windows = []
@@ -47,52 +46,65 @@ function single_visibility(ground_site, sat, t_ahead=100, step=1) {
     }
   }
 
+  console.log(sat.satnum);
+
   return {'visible':visible, 'window':windows};
 }
 
-function site_visibility(ground_site, sat) {
+function site_visibility(ground_site, sat, t_ahead, step, start) {
   let sat_visability = [];
 
   sat.forEach(sat => {
-    sat_visability.push(single_visibility(ground_site, sat));
+    sat_visability.push(single_visibility(ground_site, sat,t_ahead,step,start));
   });
-  return {'sat_vis':sat_visability, 'name':ground_site.name};
+  return {'sat_vis':sat_visability, 'name':ground_site.name, 'sats':sat};
 }
 
-function visibility(ground_sites, sat) {
+function visibility(ground_sites, sat, start=0, t_ahead=180, step=1) {
   let vis = [];
 
+  console.log('foo')
+
   ground_sites.forEach(site => {
-    vis.push(site_visibility(site, sat));
+    vis.push(site_visibility(site, sat,t_ahead,step,start));
   })
+
+  console.log(vis);
 
   return vis;
 }
 
 const TIME_OFF = 440;
 
-function addVisibilityPlots(vis) {
+function addVisibilityPlots(vis, colors=undefined) {
 
   let div_width = getSize(vis) * TIME_OFF * 2.2;
   // get the div and add new svg
   let svg = d3.select("#visplots")
               .append('svg')
               .attr('width', div_width)
-              .attr('height', 1280);
+              .attr('height', 1430);
 
   // get earliest window
   let start = getStart(vis);
 
   // add the station time segments
-  let off = 16;
-  let name_off = 100;
+  
+  let off = 18;
+  let name_off = 160;
+
+  addTimePlot(svg, start, name_off);
+
   vis.forEach(g_station => {
     for (let i = 0; i < g_station.sat_vis.length; i++) {
       // console.log(off)
-      createVisPlot(g_station.sat_vis[i], svg, i * 16 + off, start, g_station.name,div_width,name_off);
-    }
-    off += g_station.sat_vis.length * 16;
+      console.log(g_station);
+      createVisPlot(g_station.sat_vis[i], svg, i * 16 + off, start, g_station.name,g_station.sats[i].satnum, '#1111FF',div_width,name_off);
+  }
+  off += g_station.sat_vis.length * 16;
   });
+
+  return svg;
 }
 
 function getSize(vis) {
@@ -130,66 +142,92 @@ function getStart(vis) {
   return start;
 }
 
-function createVisPlot(vis, svg, dy, start, name,div=1280, name_off=100, width=10000) {
-  // create time display data
-  // console.log(vis);
-  // console.log(dy);
-  // console.log(div)
+function addTimePlot(svg, start, name_off, width = 3, step=15, time = 180) {
+  // add time scale
 
-  svg.append('rect')
-    .attr('x', name_off)
+  for (let i = 0; i < time; i+=step){
+
+    // convert to sidereal day then multiply by width
+    let x = i * width;
+    // console.log("offset");
+    // console.log(i)
+    // console.log(x);
+
+    //let text = satellite.invjday(start + day);
+    let hour = Math.floor(i / 60);
+    let minute = i % 60;
+
+    let text = "" + hour +":" + minute;
+
+    svg.append('text')
+      .attr('x', name_off + x)
+      .attr('y', 16)
+      .text(text)
+  }
+}
+
+function sidereal2min(sidereal) {
+  return sidereal * 1436.068183;
+}
+//23 hours 56 minutes 4.091
+
+      // // append the time string
+      // let start_time = satellite.invjday(win[0])
+      // svg.append('text')
+      // .attr('x', x_off)
+      // .attr('y', dy + 16)
+      // .text(start_time)
+      
+      // // append the end time
+      // let end_time = satellite.invjday(win[1])
+      // svg.append('text')
+      // .attr('x', x_off + TIME_OFF + dt * width + 5)
+      // .attr('y', dy + 16)
+      // .text(end_time)
+      
+      // svg.append('text')
+      //   .attr('x', x_off + TIME_OFF)
+      //   .attr('y', dy + 16)
+      //   .text(((end_time - start_time) / 1000 / 60 ) + ' min')
+
+function createVisPlot(vis, svg, dy, start, name, satname, color='#69a3b2', div=1280, name_off=100, width=3) {
+
+  // make for every 15 seconds
+  let step = 15;
+  for (let i = 0; i < 180; i+=step) {
+    let dx = width * step;
+    let x = i * width;
+    
+    svg.append('rect')
+    .attr('x', name_off + x)
     .attr('y', dy)
-    .attr('width', div)
+    .attr('width', dx)
     .attr('height', 16)
-    .attr('stroke', 'black')
-    .attr('fill', '#dddddd')
+    .attr('stroke', '#dddddd')
+    .attr('fill', '#aaaaaa')
+  }
 
   let x_off = name_off;
   vis.window.forEach(win => {
     let dt = win[1] - win[0];
 
+
     if (!isNaN(dt)) {
-      
-      
-      // console.log(win[0])
-      
-      // console.log(dt);
-      // console.log(dy);
-      
-      
-      
       // append the visibility window
-      let xloc = (win[0] - start) * width + name_off
+      let xloc = sidereal2min(win[0] - start) * width + name_off
+      // console.log("xloc");
+      // console.log(xloc);
+      // console.log(sidereal2min(dt));
+
       svg.append('rect')
-      .attr('x', x_off + TIME_OFF)
+      .attr('x', x_off + xloc)
       .attr('y', dy)
-      .attr('width', dt * width)
+      .attr('width', sidereal2min(dt) * width)
       .attr('height', 16)
       .attr('stroke', 'black')
-      .attr('fill', '#69a3b2')
-      
-      // append the time string
-      let start_time = satellite.invjday(win[0])
-      svg.append('text')
-      .attr('x', x_off)
-      .attr('y', dy + 16)
-      .text(start_time)
-      
-      // append the end time
-      let end_time = satellite.invjday(win[1])
-      svg.append('text')
-      .attr('x', x_off + TIME_OFF + dt * width + 5)
-      .attr('y', dy + 16)
-      .text(end_time)
-      
-      svg.append('text')
-        .attr('x', x_off + TIME_OFF)
-        .attr('y', dy + 16)
-        .text(((end_time - start_time) / 1000 / 60 ) + ' min')
-      // console.log(x_off + TIME_OFF + dt * width + 5)
-        
+      .attr('fill', color)
+
       x_off += TIME_OFF + TIME_OFF + dt * width
-    
     }
   });
   
@@ -197,7 +235,8 @@ function createVisPlot(vis, svg, dy, start, name,div=1280, name_off=100, width=1
   svg.append('text')
   .attr('x', 0)
   .attr('y', dy + 16)
-  .text(name);
+  .text(name + " " + satname);
+  console.log(satname);
   
   // plot visibility data (visibility time)
 }

@@ -52,6 +52,14 @@ class Forecast {
       .then(function (clouds) {
         worldMap.updateObscura(clouds)
       });
+      console.log("here")
+      
+    worldMap.clearLines();
+    worldMap.updateSatellites(parseInt(value));
+    console.log(value)
+
+    worldMap.clearVisibility();
+    worldMap.showVisibility(parseInt(value));
 
     this.display();
   }
