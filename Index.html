@@ -19,20 +19,19 @@
     <script src='script/map.js'defer></script>
     <script src='script/forecast.js' defer></script>
     <script src='script/data_loader.js' defer></script>
-  <!--
-      <script src='script/read_data.js' defer></script>
-  --> 
     
 </head>
 
 <body>
 
-    <h3>Upload a file</h3>
+    <h1>Satellite Visibility Visualizer</h1>
+
+    <h3>Upload a TLE file from CelesTrak</h3>
     <input type='file' id='data'>
 
     <h3>World Map</h3>
-    <div id = 'map'>
-        <svg width='946' height='475' id='map'>
+    <div id='mapFrame'>
+        <svg width='966' height='495' id='map'>
             <g id='base'></g>
             <g id='clouds'></g>
             <g id='grounds'></g>
@@ -58,6 +57,11 @@
 
     <div id='visplots'>    
     </div>
+
+    <footer>
+        <p>Written by Jonathan Petersen and John Humble</p>
+        <p>Developed as part of a CS 6890 class at Utah State University</p>
+    </footer>
 
 </body>
 

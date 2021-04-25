@@ -1,7 +1,17 @@
 
+html {
+    background: #333333;
+}
+
 body {
     width: 80%;
     margin: auto;
+    background: white;
+    text-align: center;
+}
+
+h1 {
+    margin: 0;
 }
 
 #map {
